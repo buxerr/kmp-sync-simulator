@@ -1,19 +1,33 @@
-# KMP Sync Simulator
+# Kotlin Multiplatform Offline Sync Testing Simulator
 
-A dependency-free Kotlin Multiplatform test toolkit for existing sync engines. Its core lives in commonMain and builds for JVM and Linux Native. It supplies a bounded logical clock, deterministic packet loss, duplication, delays, reordering, capped retry schedules, duplicate-delivery checks, outbox invariants, and replica convergence assertions.
+Test an existing offline-first synchronization engine under deterministic network failures. This Kotlin Multiplatform toolkit simulates packet loss, duplicate delivery, delays, reordering, and capped retry schedules, then checks outbox invariants and replica convergence.
 
-## Test
+It is a test simulator for adapters to an existing sync engine, not another persistence or synchronization engine.
 
-Run ./gradlew check compileKotlinLinuxX64 (Windows: gradlew.bat check compileKotlinLinuxX64). The common source has no Android or database dependency, so a Room or SQLDelight adapter can connect through SyncEngineAdapter.
+## Supported targets and build
 
-## Adapter contract
+The dependency-free core is in `commonMain` and currently builds for JVM and Linux Native. It has no Android or database dependency, so a Room or SQLDelight adapter can connect through `SyncEngineAdapter`.
 
-Implement pendingMutations, applyRemote, acknowledge, and snapshot for the engine under test. Call SyncHarness.publishPending to enqueue its outbox through a DeterministicNetwork, advance the network by logical ticks, and call deliverReady on the receiving adapter. A test can inject per-mutation delay, drop, or duplicate plans. ConflictReplay.replay applies a recorded arrival order through the application's ConflictResolver and records each winner.
+```sh
+git clone https://github.com/buxerr/kmp-sync-simulator.git
+cd kmp-sync-simulator
+./gradlew check compileKotlinLinuxX64
+```
 
-SyncHarness.assertDuplicateDelivery checks that applying the same mutation twice leaves state unchanged and returns DUPLICATE the second time. Outbox version checks assume strictly increasing per-entity versions; engines with vector clocks should use their own invariant checks instead.
+On Windows, use `gradlew.bat check compileKotlinLinuxX64`.
 
-## Scope
+## Connect a sync adapter
 
-This project tests adapter behavior and deterministic network scenarios; it does not implement synchronization, persistence, a conflict policy, transport I/O, or a production retry loop. The core simulator itself is single-threaded and bounded.
+Implement `pendingMutations`, `applyRemote`, `acknowledge`, and `snapshot` for the engine under test. Use `SyncHarness.publishPending` to put its outbox through a `DeterministicNetwork`, advance logical ticks, and deliver ready mutations to the receiving adapter. A test can inject per-mutation delay, loss, or duplication. `ConflictReplay.replay` applies a recorded arrival order through the application's `ConflictResolver` and records each winner.
 
-MIT licensed. See LICENSE.
+`SyncHarness.assertDuplicateDelivery` checks that applying the same mutation twice leaves state unchanged and returns `DUPLICATE` on the second apply. Outbox version checks assume strictly increasing per-entity versions; engines using vector clocks should add their own invariant checks.
+
+For the application-level offline-first concerns this simulator exercises, see [Android's offline-first data-layer guide](https://developer.android.com/topic/architecture/data-layer/offline-first).
+
+## Scope and limitations
+
+The simulator does not implement synchronization, persistence, conflict policy, transport I/O, or a production retry loop. Its core is single-threaded and bounded. The repository currently provides source and test harnesses rather than a published Maven artifact.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
