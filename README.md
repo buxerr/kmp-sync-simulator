@@ -4,6 +4,18 @@ Test an existing offline-first synchronization engine under deterministic networ
 
 It is a test simulator for adapters to an existing sync engine, not another persistence or synchronization engine.
 
+Tagged releases are consumable from JitPack. After a `v0.1.0` release is available, add JitPack to the repositories used by your Gradle build:
+
+```kotlin
+repositories {
+    maven("https://jitpack.io")
+}
+
+dependencies {
+    implementation("com.github.buxerr:kmp-sync-simulator:v0.1.0")
+}
+```
+
 ## Supported targets and build
 
 The dependency-free core is in `commonMain` and currently builds for JVM and Linux Native. It has no Android or database dependency, so a Room or SQLDelight adapter can connect through `SyncEngineAdapter`.
@@ -26,7 +38,7 @@ For the application-level offline-first concerns this simulator exercises, see [
 
 ## Scope and limitations
 
-The simulator does not implement synchronization, persistence, conflict policy, transport I/O, or a production retry loop. Its core is single-threaded and bounded. The repository currently provides source and test harnesses rather than a published Maven artifact.
+The simulator does not implement synchronization, persistence, conflict policy, transport I/O, or a production retry loop. Its core is single-threaded and bounded. JitPack builds tagged Gradle releases on demand.
 
 ## License
 

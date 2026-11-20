@@ -1,6 +1,11 @@
 plugins {
     kotlin("multiplatform") version "2.4.21"
+    `maven-publish`
 }
+
+group = "com.github.buxerr"
+// JitPack sets VERSION to the Git tag being built (for example, v0.1.0).
+version = providers.environmentVariable("VERSION").orElse("0.1.0").get()
 
 repositories {
     mavenCentral()
